@@ -43,15 +43,18 @@ void delay(unsigned long ms) { Sleep(ms); }
 
 void delay(int ms) { Sleep(ms); }
 
-void delayMicroseconds(unsigned int us) {
+void delayMicroseconds(unsigned int us)
+{
     std::this_thread::sleep_for(std::chrono::microseconds(us));
 }
 
-void yield() {
+void yield()
+{
     std::this_thread::yield();
 }
 
-void pinMode(int pin, int mode) {
+void pinMode(int pin, int mode)
+{
     // Mock - does nothing
 }
 
@@ -77,12 +80,14 @@ void digitalWrite(int pin, int value)
     printf("\x1B[%dm%.3f - %d to \x1B[%dm%s\x1B[0m\n", color, millis() / 1000.0, pin, value == LOW ? 91 : 92, value == LOW ? "LOW" : "HIGH");
 }
 
-int digitalRead(int pin) {
+int digitalRead(int pin)
+{
     // Mock - always return LOW
     return LOW;
 }
 
-int analogRead(int pin) {
+int analogRead(int pin)
+{
     // Mock - return a default analog value (mid-range)
     return 512;
 }
@@ -94,6 +99,37 @@ void Stream::clearBuffer()
 {
     cursor = 0;
     fakeBuffer[0] = '\0';
+    inputCursor = 0;
+    inputLength = 0;
+    inputBuffer[0] = '\0';
+}
+bool Stream::available()
+{
+    return inputCursor < inputLength;
+}
+
+int Stream::read()
+{
+    if (inputCursor >= inputLength)
+    {
+        return -1;
+    }
+    return inputBuffer[inputCursor++];
+}
+void Stream::simulateInput(const char *data)
+{
+    if (!data)
+        return;
+
+    inputLength = strlen(data);
+    if (inputLength >= sizeof(inputBuffer))
+    {
+        inputLength = sizeof(inputBuffer) - 1;
+    }
+
+    memcpy(inputBuffer, data, inputLength);
+    inputBuffer[inputLength] = '\0';
+    inputCursor = 0;
 }
 
 int Stream::readBytesUntil(char c, char *i, size_t len) { return 0; }

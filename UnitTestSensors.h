@@ -17,7 +17,7 @@ public:
     FakeBarometer() : Barometer(), fakeAlt(0), fakeAltSet(false)
     {
         initialized = true;
-        setName("Barometer");
+        setName("FakeBarometer");
     }
     ~FakeBarometer() {}
 
@@ -91,6 +91,10 @@ public:
         position.x() = lat;
         position.y() = lon;
         position.z() = alt;
+    }
+    void setHeading(double h)
+    {
+        heading = h;
     }
     void setDateTime(int y, int m, int d, int h, int mm, int s)
     {

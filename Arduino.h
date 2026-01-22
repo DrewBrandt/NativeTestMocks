@@ -123,9 +123,9 @@ public:
     void begin(int baud = 9600);
     void end();
     void clearBuffer();
-    virtual int available() { return 0; }  // Mock - no data available
+    virtual bool available();  // Mock - no data available
     virtual int peek() { return -1; }  // Mock - no data to peek
-    virtual int read() { return -1; }  // Mock read - returns -1 (no data)
+    virtual int read();  // Mock read - returns -1 (no data)
     int readBytesUntil(char i, char *buf, size_t s);
     size_t readBytes(char *buf, size_t len) { return 0; }  // Mock - no data
     size_t readBytes(uint8_t *buf, size_t len) { return 0; }  // Mock - no data
@@ -139,8 +139,15 @@ public:
     }
     operator bool() { return true; }
 
+    // For simulating incoming data in tests
+    void simulateInput(const char *data);
+
     char fakeBuffer[1000];
     int cursor = 0;
+    // Input buffer for read operations
+    char inputBuffer[1000];
+    int inputCursor = 0;
+    int inputLength = 0;
 };
 
 // Arduino String class
