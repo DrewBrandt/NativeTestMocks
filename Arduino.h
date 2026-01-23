@@ -121,48 +121,6 @@ int analogRead(int pin);
 // Forward declaration for SITL support
 class SITLSocket;
 
-class Stream : public Print
-{
-public:
-    void begin(int baud = 9600);
-    void end();
-    void clearBuffer();
-    virtual bool available();  // Mock - no data available
-    virtual int peek() { return -1; }  // Mock - no data to peek
-    virtual int read();  // Mock read - returns -1 (no data)
-    int readBytesUntil(char i, char *buf, size_t s);
-    size_t readBytes(char *buf, size_t len) { return 0; }  // Mock - no data
-    size_t readBytes(uint8_t *buf, size_t len) { return 0; }  // Mock - no data
-    size_t write(uint8_t b) override;
-    size_t write(const uint8_t *buf, size_t len) {  // Add buffer write
-        size_t written = 0;
-        for (size_t i = 0; i < len; i++) {
-            written += write(buf[i]);
-        }
-        return written;
-    }
-    operator bool() { return true; }
-
-    // For simulating incoming data in tests
-    void simulateInput(const char *data);
-
-    // SITL (Software-In-The-Loop) mode - connect to external simulator
-    bool connectSITL(const char* host, int port);
-    void disconnectSITL();
-    bool isSITLConnected() const;
-
-    char fakeBuffer[1000];
-    int cursor = 0;
-    // Input buffer for read operations
-    char inputBuffer[1000];
-    int inputCursor = 0;
-    int inputLength = 0;
-
-private:
-    SITLSocket* sitlSocket = nullptr;  // TCP connection to external simulator
-    void pollSITLInput();  // Poll for incoming data from simulator
-};
-
 // Arduino String class
 #include <string>
 class String {
@@ -197,20 +155,105 @@ public:
     String substring(int start, int end) const {
         return String(str.substr(start, end - start));
     }
-    void trim(){
-        str.erase(0, str.find_first_not_of(' '));
-    
+    void trim() {
+        size_t first = str.find_first_not_of(" \t\r\n");
+        if (std::string::npos == first) {
+            str = "";
+        } else {
+            size_t last = str.find_last_not_of(" \t\r\n");
+            str = str.substr(first, (last - first + 1));
+        }
     }
+    long toInt() const {
+        try { return std::stol(str); } catch (...) { return 0; }
+    }
+    float toFloat() const {
+        try { return std::stof(str); } catch (...) { return 0.0f; }
+    }
+    double toDouble() const {
+        try { return std::stod(str); } catch (...) { return 0.0; }
+    }
+    
+    String& operator+=(char c) {
+        str += c;
+        return *this;
+    }
+    String& operator+=(const char* s) {
+        str += (s ? s : "");
+        return *this;
+    }
+    
     operator const char*() const { return str.c_str(); }
+    bool operator==(const String& other) const { return str == other.str; }
+    bool operator==(const char* other) const { return str == (other ? other : ""); }
+};
+
+class Stream : public Print
+{
+public:
+    void begin(int baud = 9600);
+    void end();
+    void clearBuffer();
+    virtual bool available();  // Mock - no data available
+    virtual int peek();
+    virtual int read();  // Mock read - returns -1 (no data)
+    int readBytesUntil(char i, char *buf, size_t s);
+    size_t readBytes(char *buf, size_t len);
+    size_t readBytes(uint8_t *buf, size_t len);
+    size_t write(uint8_t b) override;
+    size_t write(const uint8_t *buf, size_t len) {  // Add buffer write
+        size_t written = 0;
+        for (size_t i = 0; i < len; i++) {
+            written += write(buf[i]);
+        }
+        return written;
+    }
+    
+    String readString() {
+        String ret = "";
+        int c = read();
+        while (c >= 0) {
+            ret += (char)c;
+            c = read();
+        }
+        return ret;
+    }
+
+    String readStringUntil(char terminator) {
+        String ret = "";
+        int c = read();
+        while (c >= 0 && c != terminator) {
+            ret += (char)c;
+            c = read();
+        }
+        return ret;
+    }
+
+    operator bool() { return true; }
+
+    // For simulating incoming data in tests
+    void simulateInput(const char *data);
+
+    // SITL (Software-In-The-Loop) mode - connect to external simulator
+    bool connectSITL(const char* host, int port);
+    void disconnectSITL();
+    bool isSITLConnected() const;
+
+    char fakeBuffer[1000];
+    int cursor = 0;
+    // Input buffer for read operations
+    char inputBuffer[1000];
+    int inputCursor = 0;
+    int inputLength = 0;
+
+private:
+    SITLSocket* sitlSocket = nullptr;  // TCP connection to external simulator
+    void pollSITLInput();  // Poll for incoming data from simulator
 };
 
 class SerialClass : public Stream
 {
 public:
-    String readStringUntil(char terminator) {
-        // Mock implementation - return empty string
-        return String("");
-    }
 };
 
 extern SerialClass Serial;

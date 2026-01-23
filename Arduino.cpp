@@ -150,7 +150,7 @@ int Stream::read()
     {
         return -1;
     }
-    return inputBuffer[inputCursor++];
+    return (uint8_t)inputBuffer[inputCursor++];
 }
 
 void Stream::simulateInput(const char *data)
@@ -169,7 +169,44 @@ void Stream::simulateInput(const char *data)
     inputCursor = 0;
 }
 
-int Stream::readBytesUntil(char c, char *i, size_t len) { return 0; }
+int Stream::peek()
+{
+    pollSITLInput();
+    if (inputCursor >= inputLength)
+    {
+        return -1;
+    }
+    return (uint8_t)inputBuffer[inputCursor];
+}
+
+int Stream::readBytesUntil(char terminator, char *buffer, size_t length)
+{
+    if (length < 1) return 0;
+    size_t index = 0;
+    while (index < length) {
+        int c = read();
+        if (c < 0) break;
+        if (c == terminator) break;
+        buffer[index++] = (char)c;
+    }
+    return index;
+}
+
+size_t Stream::readBytes(char *buffer, size_t length)
+{
+    size_t count = 0;
+    while (count < length) {
+        int c = read();
+        if (c < 0) break;
+        buffer[count++] = (char)c;
+    }
+    return count;
+}
+
+size_t Stream::readBytes(uint8_t *buffer, size_t length)
+{
+    return readBytes((char *)buffer, length);
+}
 
 size_t Stream::write(uint8_t b)
 {
