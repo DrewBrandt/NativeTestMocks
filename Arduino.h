@@ -221,10 +221,21 @@ public:
 
     String readStringUntil(char terminator) {
         String ret = "";
-        int c = read();
-        while (c >= 0 && c != terminator) {
+        unsigned long startTime = millis();
+        const unsigned long timeout = 1000; // 1 second timeout
+
+        while (millis() - startTime < timeout) {
+            int c = read();
+            if (c < 0) {
+                // No data available - yield and try again
+                std::this_thread::sleep_for(std::chrono::microseconds(100));
+                continue;
+            }
+            if (c == terminator) {
+                // Found terminator - success
+                break;
+            }
             ret += (char)c;
-            c = read();
         }
         return ret;
     }

@@ -115,6 +115,13 @@ void Stream::pollSITLInput()
         return;
     }
 
+    // If the buffer has been fully consumed, reset it before polling for new data.
+    // This prevents the buffer from growing indefinitely.
+    if (inputCursor >= inputLength) {
+        inputCursor = 0;
+        inputLength = 0;
+    }
+
     // Check if there's room in the input buffer
     int roomAvailable = sizeof(inputBuffer) - inputLength;
     if (roomAvailable <= 0) {
