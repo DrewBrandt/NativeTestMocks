@@ -222,7 +222,7 @@ size_t Stream::write(uint8_t b)
         fakeBuffer[cursor++] = b;
         fakeBuffer[cursor] = '\0';
     }
-    std::cout << b;
+    // std::cout << b;
 
 
     // If SITL is connected, send to external simulator
