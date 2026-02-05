@@ -260,8 +260,8 @@ bool Stream::isSITLConnected() const
     return sitlSocket && sitlSocket->isConnected();
 }
 
-SerialClass Serial;
-SerialClass Serial1;
-SerialClass Serial2;
-SerialClass Serial3;
+HardwareSerial Serial;
+HardwareSerial Serial1;
+HardwareSerial Serial2;
+HardwareSerial Serial3;
 CrashReportClass CrashReport;

@@ -33,8 +33,8 @@ public:
         return 0;
     }
 
-    // Override update(double time = -1) to prevent recalculation when altitude is set directly
-    int update(double time = -1) override
+    // Override update() to prevent recalculation when altitude is set directly
+    bool update(double currentTime = -1) override
     {
         if (!read())
             return -1;

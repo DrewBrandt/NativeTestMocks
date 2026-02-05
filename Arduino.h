@@ -24,6 +24,10 @@
 
 #define INPUT 1
 #define OUTPUT 0
+#define INPUT_PULLUP 2
+#define INPUT_PULLDOWN 3
+
+#define A0 0
 
 #define LED_BUILTIN 13
 #define BUILTIN_SDCARD 254
@@ -262,15 +266,21 @@ private:
     void pollSITLInput();  // Poll for incoming data from simulator
 };
 
+
+
 class SerialClass : public Stream
 {
 public:
 };
+class HardwareSerial : public SerialClass
+{
+public:
+};
 
-extern SerialClass Serial;
-extern SerialClass Serial1;
-extern SerialClass Serial2;
-extern SerialClass Serial3;
+extern HardwareSerial Serial;
+extern HardwareSerial Serial1;
+extern HardwareSerial Serial2;
+extern HardwareSerial Serial3;
 
 class CrashReportClass
 {
