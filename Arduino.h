@@ -27,6 +27,10 @@
 #define INPUT_PULLUP 2
 #define INPUT_PULLDOWN 3
 
+// Platform ADC configuration for testing
+#define PLATFORM_ADC_BITS 10
+#define PLATFORM_DEFAULT_REF_VOLTAGE 3.3
+
 #define A0 0
 
 #define LED_BUILTIN 13
@@ -120,6 +124,10 @@ void pinMode(int pin, int mode);
 
 int analogRead(int pin);
 
+// Mock helpers for testing
+void setMockAnalogRead(int pin, int value);
+void clearMockAnalogReads();
+
 #ifdef __cplusplus
 
 // Forward declaration for SITL support
@@ -195,6 +203,8 @@ public:
 class Stream : public Print
 {
 public:
+    Stream() = default;
+    ~Stream();
     void begin(int baud = 9600);
     void end();
     void clearBuffer();

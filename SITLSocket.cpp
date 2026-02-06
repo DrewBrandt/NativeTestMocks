@@ -174,7 +174,9 @@ void SITLSocket::disconnect()
         CLOSE_SOCKET(socketFd);
         socketFd = INVALID_SOCKET_VALUE;
     }
+#ifndef PIO_UNIT_TESTING
     std::exit(0);
+#endif
     connected = false;
 }
 
@@ -243,7 +245,9 @@ int SITLSocket::read(uint8_t* buffer, size_t maxLen)
         // Connection closed by peer
         fprintf(stderr, "SITL: Connection closed by simulator\n");
         disconnect();
+#ifndef PIO_UNIT_TESTING
         std::exit(0);
+#endif
         return -1;
     }
 

@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "SITLSocket.h"
 #include <iostream>
+#include <map>
 
 const uint64_t start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 const uint64_t startMicros = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -88,10 +89,32 @@ int digitalRead(int pin)
     return LOW;
 }
 
+// Map to store mock analog read values
+static std::map<int, int> mockAnalogValues;
+
 int analogRead(int pin)
 {
+    // Check if there's a mocked value for this pin
+    if (mockAnalogValues.find(pin) != mockAnalogValues.end()) {
+        return mockAnalogValues[pin];
+    }
     // Mock - return a default analog value (mid-range)
     return 512;
+}
+
+void setMockAnalogRead(int pin, int value)
+{
+    mockAnalogValues[pin] = value;
+}
+
+void clearMockAnalogReads()
+{
+    mockAnalogValues.clear();
+}
+
+Stream::~Stream()
+{
+    disconnectSITL();
 }
 
 void Stream::begin(int baud) {}
