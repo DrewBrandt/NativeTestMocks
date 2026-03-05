@@ -68,7 +68,7 @@ SITLSocket::~SITLSocket()
     disconnect();
 }
 
-bool SITLSocket::connect(const char *host, int port)
+bool SITLSocket::connect(const char *host, int port, int maxRetries)
 {
     if (connected)
     {
@@ -108,7 +108,8 @@ bool SITLSocket::connect(const char *host, int port)
     // --- NEW RETRY LOGIC ---
     printf("SITL: Attempting to connect to simulator at %s:%d...\n", host, port);
 
-    while (true)
+    int attempts = 0;
+    while (maxRetries < 0 || attempts < maxRetries)
     {
         if (::connect(socketFd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) != SOCKET_ERROR)
         {
@@ -129,6 +130,15 @@ bool SITLSocket::connect(const char *host, int port)
         if (!wouldRetry)
         {
             fprintf(stderr, "SITL: Fatal connection error: %d\n", err);
+            CLOSE_SOCKET(socketFd);
+            socketFd = INVALID_SOCKET_VALUE;
+            return false;
+        }
+
+        attempts++;
+        if (maxRetries >= 0 && attempts >= maxRetries)
+        {
+            fprintf(stderr, "SITL: Connection retries exhausted after %d attempts\n", attempts);
             CLOSE_SOCKET(socketFd);
             socketFd = INVALID_SOCKET_VALUE;
             return false;

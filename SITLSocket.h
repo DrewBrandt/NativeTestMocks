@@ -22,9 +22,11 @@ public:
      * Connect to SITL simulator server
      * @param host Hostname or IP address (e.g., "localhost" or "127.0.0.1")
      * @param port Port number (e.g., 5555)
+     * @param maxRetries Maximum connection attempts before failing.
+     *        -1 means retry forever (default behavior).
      * @return true if connection successful
      */
-    bool connect(const char* host, int port);
+    bool connect(const char* host, int port, int maxRetries = -1);
 
     /**
      * Disconnect from simulator
