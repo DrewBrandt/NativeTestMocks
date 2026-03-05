@@ -146,7 +146,7 @@ public:
     String(unsigned int n) : str(std::to_string(n)) {}
     String(long n) : str(std::to_string(n)) {}
     String(unsigned long n) : str(std::to_string(n)) {}
-    String(float f) : str(std::to_string(f)) {}
+    String(float f, int decimals = 2) : str(std::to_string(f)) {}
     String(double d) : str(std::to_string(d)) {}
 
     const char* c_str() const { return str.c_str(); }
